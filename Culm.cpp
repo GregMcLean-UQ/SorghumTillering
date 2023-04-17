@@ -10,12 +10,11 @@ using namespace Sorghum;
 //------------------------------------------------------------------------------------------------
 //------ Culm Constructor
 //------------------------------------------------------------------------------------------------
-Culm::Culm(ScienceAPI2& api, Plant* p, double leafAppearance)// : PlantComponent(api)
+Culm::Culm()
 {
-	//plant = p;
-	//leafNoAtAppearance = leafAppearance;
+	
 	initialize();
-	doRegistrations();
+	
 }
 //------------------------------------------------------------------------------------------------
 //------ Destructor
@@ -23,28 +22,6 @@ Culm::Culm(ScienceAPI2& api, Plant* p, double leafAppearance)// : PlantComponent
 Culm::~Culm()
 {
 }
-//------------------------------------------------------------------------------------------------
-//----------- update Leaf state variables at the end of the day
-//------------------------------------------------------------------------------------------------
-//void Culm::updateVars(void)
-//{
-	//currentLeafNo = currentLeafNo + dltLeafNo;
-//}
-//--------------------------------------------------------------------------------------------------
-// Register variables for other modules
-//--------------------------------------------------------------------------------------------------
-void Culm::doRegistrations(void)
-{
-	//scienceAPI.expose("CurrentLeaf", "", "Current Leaf", false, currentLeafNo);
-}
-
-void Culm::setProportion(double val) { proportion = val; }
-double Culm::getLeafArea() { return leafArea; }
-
-double Culm::getFinalLeafNo(void) { return finalLeafNo; }
-double Culm::getCurrentLeafNo(void) { return currentLeafNo; }
-void Culm::setCurrentLeafNo(const double& val) { currentLeafNo = val; }
-
 //------------------------------------------------------------------------------------------------
 //------- Initialize variables
 //------------------------------------------------------------------------------------------------

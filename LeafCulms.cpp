@@ -49,7 +49,7 @@ void LeafCulms::initialize()
 	Culms.clear();
 	// Initialise Main
 
-	Culms.push_back(new Culm(scienceAPI, plant, 0));
+	Culms.push_back(new Culm());
 
 	tillersAdded = 0;
 	calculatedTillers = 0.0;
@@ -557,9 +557,7 @@ void LeafCulms::AddInitialTillers()
 
 void LeafCulms::initiateTiller(int tillerNumber, double fractionToAdd, double initialLeaf)
 {
-
-
-	Culm* newCulm = new Culm(scienceAPI, plant, initialLeaf);
+	Culm* newCulm = new Culm();
 	newCulm->setCanopyParams(leafAreaParams, finalLeafNo);
 	newCulm->setCulmNo(tillerNumber);
 	newCulm->setCurrentLeafNo(initialLeaf);
@@ -569,7 +567,6 @@ void LeafCulms::initiateTiller(int tillerNumber, double fractionToAdd, double in
 	//	newCulm->calcLeafAppearance();
 	//newCulm->calculateLeafSizes();
 	Culms.push_back(newCulm);
-
 }
 
 void LeafCulms::addTillerProportion(double leafAtAppearance, double fractionToAdd)

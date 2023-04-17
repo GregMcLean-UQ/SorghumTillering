@@ -14,7 +14,7 @@
 using namespace std;
 
 namespace Sorghum {
-	
+
 	//------------------------------------------------------------------------------------------------
 	//------ Culm
 	//------------------------------------------------------------------------------------------------
@@ -48,7 +48,7 @@ namespace Sorghum {
 		//double finalLeafCorrection;
 		//double vertAdjValue;
 
-		
+
 		int culmNo;
 
 		// plant
@@ -58,35 +58,20 @@ namespace Sorghum {
 
 		// public Methods -------------------------------------------------------
 	public:
-		Culm(ScienceAPI2& api, Plant* p, double leafNoAtApp);
+		Culm();
 		~Culm();
 
-		
-		///virtual void initialize(void);
-		 //void initT(LeafAreaParams leafAreaParams, int posn);
-		//virtual void updateVars(void);
-		//virtual void doRegistrations(void);
+		void initialize(void);
+		void readParams(void);
 
-		 void initialize(void) ;
-		 void readParams(void);
-		 //void updateVars(void) ;
 		void initT(LeafAreaParams leafAreaParams, int posn);
-		 void doRegistrations(void);
-
 		void setCanopyParams(LeafAreaParams lAP, double finalLeafNumber);
 
-		double getCurrentLeafNo(void);
-		void setCurrentLeafNo(const double& val);
-		//double getlastLeafNumber() { return lastLeafNumber; }
 		double gettotalArea() { return totalArea; }
 
-		//void setLastLeafNo(double _leafNo) { lastLeafNumber = _leafNo; }
-		double getFinalLeafNo(void);
 		double calcLeafAppearance(double dltTT, double appearanceRate1, double  appearanceRate2, double noRateChange);
 		double calcPotentialLeafArea(void);
 		double calcIndividualLeafSize(double leafNo);
-		void setProportion(double proportion);
-		double getLeafArea();
 		double getProportion() { return proportion; }
 
 		void setCulmNo(int _culmNo) { culmNo = _culmNo; }
@@ -99,6 +84,12 @@ namespace Sorghum {
 		double setDltLAI(double val) { dltLAI = val; }
 		double getStressedDltLAI() { return dltStressedLAI; }
 		void setStressedDltLAI(double val) { dltStressedLAI = val; }
+		void setProportion(double val) { proportion = val; }
+		double getLeafArea() { return leafArea; }
+
+		double getFinalLeafNo(void) { return finalLeafNo; }
+		double getCurrentLeafNo(void) { return currentLeafNo; }
+		void setCurrentLeafNo(const double& val) { currentLeafNo = val; }
 
 	};
 
