@@ -10,11 +10,11 @@ using namespace Sorghum;
 //------------------------------------------------------------------------------------------------
 //------ Culm Constructor
 //------------------------------------------------------------------------------------------------
-Culm::Culm()
+Culm::Culm(int posn)
 {
 	
 	initialize();
-	
+	culmNo = posn;
 }
 //------------------------------------------------------------------------------------------------
 //------ Destructor
@@ -38,32 +38,19 @@ void Culm::initialize(void)
 	totalLAI = 0.0;
 	dltStressedLAI = 0.0;
 	dltLAI = 0.0;
-	culmNo = 0;
 	leafArea = 0;
 	totalArea = 0;
-
-	//readParams();
 }
 
 
 //------------------------------------------------------------------------------------------------
 //-----------  read leaf parameters
 //------------------------------------------------------------------------------------------------
-void Culm::initT(LeafAreaParams leafAreaParams, int posn)
-{
 
-	leafNoCorrection = leafAreaParams.leafNoCorrection;       //corrects for other growing leaves
-	largestLeafPlateau = leafAreaParams.largestLeafPlateau;
 
-	culmNo = posn;
-
-}
-void Culm::readParams(void)
-{
-
- }
 void Culm::setCanopyParams(LeafAreaParams lAP, double finalLeafNumber)
 {
+
 	finalLeafNo = finalLeafNumber - culmNo;
 	// Canopy parameters
 	// aMax and x0 for tillers have values relative to those of the main stem.
@@ -82,6 +69,9 @@ void Culm::setCanopyParams(LeafAreaParams lAP, double finalLeafNumber)
 	leafSizes.clear();
 	for (int leafNo = 1; leafNo < ceil(finalLeafNo) + 1; leafNo++)
 		leafSizes.push_back(aMax * exp(a * pow((leafNo - x0), 2) + b * pow((leafNo - x0), 3)) * 100);
+	leafNoCorrection = lAP.leafNoCorrection;       //corrects for other growing leaves
+	largestLeafPlateau = lAP.largestLeafPlateau;
+
 }
 
 double Culm::calcLeafAppearance(double dltTT, double appearanceRate1, double  appearanceRate2, double noRateChange)

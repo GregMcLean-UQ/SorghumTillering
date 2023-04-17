@@ -38,9 +38,7 @@ namespace Sorghum {
 	protected:
 		vector<Culm*> Culms;
 		vector<int> tillerOrder;
-		double verticalAdjustment;
-		double aMaxVert;
-		double aTillerVert;
+//		double verticalAdjustment;
 		double calculatedTillers;
 		double supply;
 		double demand;

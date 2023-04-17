@@ -17,9 +17,9 @@ LeafCulms::LeafCulms(ScienceAPI2& api, Plant* p) : Leaf(api, p)
 	plant = p;
 	name = "Leaf";
 	partNo = 1;
-	verticalAdjustment = 0.1;
-	aMaxVert = 0.3;
-	aTillerVert = 0.05;
+	//verticalAdjustment = 0.1;
+	//aMaxVert = 0.3;
+	//aTillerVert = 0.05;
 	avgRadiation = 0.0;
 	calculatedTillers = 0.0;
 	thermalTimeCount = 0.0;
@@ -47,9 +47,9 @@ void LeafCulms::initialize()
 	//Remove all then add the first culm (which is the main culm or stem).
 
 	Culms.clear();
-	// Initialise Main
 
-	Culms.push_back(new Culm());
+	// Initialise Main Stem
+	initiateTiller(0, 1, 1);
 
 	tillersAdded = 0;
 	calculatedTillers = 0.0;
@@ -65,7 +65,6 @@ void LeafCulms::initialize()
 	maxLaiTarget = 0.0;
 	tillerLaiToReduce = 0.0;
 
-	//Culms[0]->initialize();
 	Leaf::initialize();
 }
 //------------------------------------------------------------------------------------------------
@@ -95,13 +94,6 @@ void LeafCulms::readParams(void)
 	scienceAPI.read("leaf_app_rate1", "", false, appearanceRate1);
 	scienceAPI.read("leaf_app_rate2", "", false, appearanceRate2);
 	scienceAPI.read("leaf_no_rate_change", "", false, noRateChange);
-
-
-	Culms[0]->initT(leafAreaParams, 0);		// Initialize culm with parameters and position.
-	//Culms[0]->setCanopyParams(leafAreaParams, 1);
-
-	scienceAPI.read("aMaxVert", "", false, aMaxVert); // Eqn 13
-	scienceAPI.read("aTillerVert", "", false, aTillerVert); // Eqn 13
 
 	scienceAPI.read("tillerSdIntercept", "", false, tillerSdIntercept); // Eqn 13
 	scienceAPI.read("tillerSdSlope", "", false, tillerSdSlope); // Eqn 13
@@ -557,15 +549,11 @@ void LeafCulms::AddInitialTillers()
 
 void LeafCulms::initiateTiller(int tillerNumber, double fractionToAdd, double initialLeaf)
 {
-	Culm* newCulm = new Culm();
+	Culm* newCulm = new Culm(tillerNumber);
 	newCulm->setCanopyParams(leafAreaParams, finalLeafNo);
-	newCulm->setCulmNo(tillerNumber);
 	newCulm->setCurrentLeafNo(initialLeaf);
 	newCulm->setProportion(fractionToAdd);
-	//newCulm->calcFinalLeafNo();
 
-	//	newCulm->calcLeafAppearance();
-	//newCulm->calculateLeafSizes();
 	Culms.push_back(newCulm);
 }
 
@@ -686,8 +674,8 @@ void LeafCulms_Fixed::readParams(void)
 	//for (int i = 0; i < (int)Culms.size(); ++i)
 	//	Culms[i]->getParams();
 
-	scienceAPI.read("aMaxVert", "", false, aMaxVert); // Eqn 13
-	scienceAPI.read("aTillerVert", "", false, aTillerVert); // Eqn 13
+	//scienceAPI.read("aMaxVert", "", false, aMaxVert); // Eqn 13
+	//scienceAPI.read("aTillerVert", "", false, aTillerVert); // Eqn 13
 }
 
 void LeafCulms_Fixed::calcLeafNo(void)
@@ -704,7 +692,7 @@ void LeafCulms_Fixed::calcLeafNo(void)
 		if (stage <= fi)
 		{
 			//Culms[0]->calcFinalLeafNo();
-			Culms[0]->setCulmNo(0);
+			//Culms[0]->setCulmNo(0);
 			finalLeafNo = Culms[0]->getFinalLeafNo();
 			//Culms[0]->calculateLeafSizes();
 

@@ -19,12 +19,12 @@ namespace Sorghum {
 	//------ Culm
 	//------------------------------------------------------------------------------------------------
 	struct LeafAreaParams;
-	class Culm //: public PlantComponent
+	class Culm 
 	{
 		// private Methods -------------------------------------------------------
 	private:
 
-		//double leafNoAtAppearance;
+		int culmNo;
 
 		// Leaf Area
 		double aMax;	//Area of the largest leaf.
@@ -43,28 +43,16 @@ namespace Sorghum {
 		double dltLAI; //growth for the current day
 		double dltStressedLAI; //adjusted growth for stress for the current day
 
-
-		//double lastLeafNumber;
-		//double finalLeafCorrection;
-		//double vertAdjValue;
-
-
-		int culmNo;
-
-		// plant
-		double density;
 	public:
 		vector<double> leafSizes;
 
 		// public Methods -------------------------------------------------------
 	public:
-		Culm();
+		Culm(int posn);
 		~Culm();
 
 		void initialize(void);
-		void readParams(void);
 
-		void initT(LeafAreaParams leafAreaParams, int posn);
 		void setCanopyParams(LeafAreaParams lAP, double finalLeafNumber);
 
 		double gettotalArea() { return totalArea; }
@@ -74,7 +62,6 @@ namespace Sorghum {
 		double calcIndividualLeafSize(double leafNo);
 		double getProportion() { return proportion; }
 
-		void setCulmNo(int _culmNo) { culmNo = _culmNo; }
 		int getCulmNo() { return culmNo; }
 		double getAreaOfCurrentLeaf(double leaves);
 
