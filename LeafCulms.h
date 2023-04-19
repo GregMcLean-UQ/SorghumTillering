@@ -44,6 +44,7 @@ namespace Sorghum {
 		double demand;
 
 		vector<double> radiationValues;
+		vector<double> temperatureValues;
 		double avgRadiation;
 		double thermalTimeCount;
 		double maxLAIForTillerAddition;
@@ -84,10 +85,13 @@ namespace Sorghum {
 		virtual void calcPotentialArea(void);
 		virtual void areaActual(void);
 
+		void calcTillers(int currentLeaf);
 		virtual void calcTillerAppearance(int newLeafNo, int currentLeafNo);
-		void calcTillerNumber(int newLeafNo);
-		void AddInitialTillers();
+		void calcTillerNumber(double PTQ);
+		void AddInitialTillers(void);
 		virtual void initiateTiller(int tillerNumber, double fractionToAdd, double initialLeaves);
+		double calcLinearLAI(void);
+
 
 		void addTillerProportion(double leafAtAppearance, double fractionToAdd);
 		virtual double calcCeaseTillerSignal();

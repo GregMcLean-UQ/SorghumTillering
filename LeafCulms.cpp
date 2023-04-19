@@ -60,6 +60,7 @@ void LeafCulms::initialize()
 	tillerSdSlope = 0;
 	tillerSlaBound = 0;
 	radiationValues.clear();
+	temperatureValues.clear();
 	laiReductionForSLA = 0.0;
 	totalLaiReductionForSLA = 0.0;
 	maxLaiTarget = 0.0;
@@ -426,7 +427,7 @@ void LeafCulms::calcLeafNo(void)
 		// 
 		// Calculate leaf growth for each culm. Tillers take longer than main to get all leaves expanded.
 		// Stop calculating at SGF for now.
-		double currentLeafNo = Culms[0]->getCurrentLeafNo();
+		int currentLeaf = (int)floor( Culms[0]->getCurrentLeafNo());
 		if (stage < startGrainFill)
 		{
 			dltLeafNo = Culms[0]->calcLeafAppearance(plant->phenology->getDltTT(), appearanceRate1, appearanceRate2, noRateChange);
@@ -435,66 +436,82 @@ void LeafCulms::calcLeafNo(void)
 				Culms[i]->calcLeafAppearance(plant->phenology->getDltTT(), appearanceRate1, appearanceRate2, noRateChange);
 			}
 		}
+		if(currentLeaf > startThermalQuotientLeafNo) calcTillers(currentLeaf);
 
-		double newLeafNo = Culms[0]->getCurrentLeafNo();
-
-		// Up to L5 FE store PTQ. At L5 FE calculate tiller number.
-		int newLeaf = (int)floor(newLeafNo);
-		int currentLeaf = (int)floor(currentLeafNo);
-		if (newLeaf >= startThermalQuotientLeafNo && currentLeaf < endThermalQuotientLeafNo)
-			calcTillerNumber(newLeaf);
-
-
-		//add any new tillers and then calc each tiller in turn
-
-		//calcTillerAppearance((int)floor(newLeafNo), (int)floor(currentLeafNo));
-
-		//for (int i = 1; i < (int)Culms.size(); ++i)
-		//{
-		//	if (stage <= fi)
-		//	{
-				//		Culms[i]->calcFinalLeafNo();
-					//	Culms[i]->calculateLeafSizes();
-		//	}
-		//	Culms[i]->calcLeafAppearance();
-		//}
 	}
 }
-
-void LeafCulms::calcTillerNumber(int newLeafNo)
+void LeafCulms::calcTillers(int currentLeaf)
 {
-	//need to calculate the average R/oCd per day during leaf 5 expansion
-	double avgradn = plant->today.radn / plant->phenology->getDltTT();
-	radiationValues.push_back(avgradn);
-	if (newLeafNo == endThermalQuotientLeafNo)
+	// Calculate tiller addition
+	int newLeaf = (int)floor(Culms[0]->getCurrentLeafNo());
+
+	// Up to L5 FE store PTQ. At L5 FE calculate tiller number (endThermalQuotientLeafNo).
+	// At L5 FE newLeaf = 6 and currentLeaf = 5
+	if (newLeaf >= startThermalQuotientLeafNo + 1 && currentLeaf < endThermalQuotientLeafNo + 1)
 	{
-		//the final tiller number (Ftn) is calculated after the full appearance of LeafNo 5 - when leaf 6 emerges.
-		//Calc Supply = R/oCd * LA5 * Phy5
-		double L5Area = Culms[0]->leafSizes[4];
-		double L9Area = Culms[0]->leafSizes[8];
-		double Phy5 = appearanceRate1;
+		//need to calculate the average R/oCd per day during leaf 5 expansion
+		radiationValues.push_back(plant->today.radn);
+		temperatureValues.push_back(plant->phenology->getDltTT());
 
-		supply = avgVector(radiationValues) * L5Area * Phy5;
-		//Calc Demand = LA9 - LA5
-		demand = L9Area - L5Area;
-		double sd = supply / demand;
-		calculatedTillers = tillerSdIntercept + tillerSdSlope * sd;
-		calculatedTillers = Max(calculatedTillers, 0.0);
-		//	calculatedTillers = min(calculatedTillers, 5.0);
+		if (newLeaf == endThermalQuotientLeafNo + 1)	// L5 Fully Expanded
+		{
+			double PTQ = sumVector(radiationValues) / sumVector(temperatureValues);
+			calcTillerNumber(PTQ);
+			AddInitialTillers();
+		}
+	}
 
-		char msg[120];
-		sprintf(msg, "Calculated Tiller Number = %.3f\n", calculatedTillers);
-		scienceAPI.write(msg);
-		sprintf(msg, "Calculated Supply = %.3f\n", supply);
-		scienceAPI.write(msg);
-		sprintf(msg, "Calculated Demand = %.3f\n", demand);
-		scienceAPI.write(msg);
+	// Each time a leaf becomes fully expanded starting at 5 see if a tiller should be initiated.
+	// When a leaf is fully expanded a tiller can be initiated at the axil 3 leaves less
+	// So at L5 FE (newLeaf = 6, currentLeaf = 5) a Tiller might be at axil 2. i.e. a T2 
 
-		AddInitialTillers();
+	// Add any new tillers and then calc each tiller in turn.
+	// Add a tiller if 1. There are more tillers to add.
+	//					2. linearLAI < maxLAIForTillerAddition
+	//					3. A leaf has fully expanded.  (newLeaf >= 6, newLeaf > currentLeaf)
+	//					4. there should be a tiller at that node. ( Check tillerOrder)
+	tillersAdded = Culms.size() - 1;
+	double lLAI = calcLinearLAI();
+	if (newLeaf >= 6 && newLeaf > currentLeaf && calculatedTillers > tillersAdded && calcLinearLAI() < maxLAIForTillerAddition)
+	{
+		// Axil = currentLeaf - 3
+		int newNodeNumber = currentLeaf - 3;
+		if (std::find(tillerOrder.begin(), tillerOrder.end(), newNodeNumber) != tillerOrder.end())
+		{
+			double fractionToAdd = min(1.0, calculatedTillers - tillersAdded);
+			initiateTiller(newNodeNumber, fractionToAdd, 1);
+		}
 	}
 }
 
-void LeafCulms::AddInitialTillers()
+void LeafCulms::calcTillerNumber(double PTQ)
+{
+
+	//the final tiller number (Ftn) is calculated after the full appearance of LeafNo 5 - when leaf 6 emerges.
+	//Calc Supply = R/oCd * LA5 * Phy5
+	double L5Area = Culms[0]->leafSizes[4];
+	double L9Area = Culms[0]->leafSizes[8];
+	double Phy5 = appearanceRate1;
+
+	supply = PTQ * L5Area * Phy5;
+	//Calc Demand = LA9 - LA5
+	demand = L9Area - L5Area;
+	double sd = supply / demand;
+	calculatedTillers = tillerSdIntercept + tillerSdSlope * sd;
+	calculatedTillers = Max(calculatedTillers, 0.0);
+	//	calculatedTillers = min(calculatedTillers, 5.0);
+
+	char msg[120];
+	sprintf(msg, "Calculated Tiller Number = %.3f\n", calculatedTillers);
+	scienceAPI.write(msg);
+	sprintf(msg, "Calculated Supply = %.3f\n", supply);
+	scienceAPI.write(msg);
+	sprintf(msg, "Calculated Demand = %.3f\n", demand);
+	scienceAPI.write(msg);
+
+}
+
+void LeafCulms::AddInitialTillers(void)
 {
 	// OLD COMMENTS
 	//tiller emergence is more closely aligned with tip apearance, but we don't track tip, so will use ligule appearance
@@ -598,6 +615,14 @@ void LeafCulms::calcTillerAppearance(int newLeafNo, int currentLeafNo)
 
 		}
 	}
+}
+
+double LeafCulms::calcLinearLAI(void)
+{
+	// calculate linear LAI
+	double pltsPerMetre = plant->getPlantDensity() * plant->getRowSpacing() / 1000.0 * plant->getSkipRow();
+	linearLAI = pltsPerMetre * tpla / 10000.0;
+	return linearLAI;
 }
 
 void LeafCulms::getLeafSizesMain(vector<float>& result)
