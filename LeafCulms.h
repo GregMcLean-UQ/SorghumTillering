@@ -86,14 +86,14 @@ namespace Sorghum {
 		virtual void areaActual(void);
 
 		void calcTillers(int currentLeaf);
-		virtual void calcTillerAppearance(int newLeafNo, int currentLeafNo);
+		//virtual void calcTillerAppearance(int newLeafNo, int currentLeafNo);
 		void calcTillerNumber(double PTQ);
 		void AddInitialTillers(void);
 		virtual void initiateTiller(int tillerNumber, double fractionToAdd, double initialLeaves);
 		double calcLinearLAI(void);
 
 
-		void addTillerProportion(double leafAtAppearance, double fractionToAdd);
+		//void addTillerProportion(double leafAtAppearance, double fractionToAdd);
 		virtual double calcCeaseTillerSignal();
 		virtual bool noAreaAdjustmentNeeded();
 		virtual double calcCarbonLimitation();

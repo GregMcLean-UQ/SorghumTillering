@@ -436,6 +436,7 @@ void LeafCulms::calcLeafNo(void)
 				Culms[i]->calcLeafAppearance(plant->phenology->getDltTT(), appearanceRate1, appearanceRate2, noRateChange);
 			}
 		}
+		// Calculate tiller numbers
 		if(currentLeaf > startThermalQuotientLeafNo) calcTillers(currentLeaf);
 
 	}
@@ -574,6 +575,7 @@ void LeafCulms::initiateTiller(int tillerNumber, double fractionToAdd, double in
 	Culms.push_back(newCulm);
 }
 
+/*
 void LeafCulms::addTillerProportion(double leafAtAppearance, double fractionToAdd)
 {
 	//Add a fraction of a tiller every day.
@@ -591,8 +593,9 @@ void LeafCulms::addTillerProportion(double leafAtAppearance, double fractionToAd
 		Culms.back()->setProportion(currentTillerFraction + fractionToAdd);
 	}
 
-}
+}*/
 
+/*
 void LeafCulms::calcTillerAppearance(int newLeafNo, int currentLeafNo)
 {
 	//if there are still more tillers to add
@@ -615,7 +618,7 @@ void LeafCulms::calcTillerAppearance(int newLeafNo, int currentLeafNo)
 
 		}
 	}
-}
+}*/
 
 double LeafCulms::calcLinearLAI(void)
 {
