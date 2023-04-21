@@ -38,8 +38,7 @@ namespace Sorghum {
 		double currentLeafNo;
 		double proportion;
 		double leafArea;//changes each day
-		double totalLAI;		// accumulated lai for this culm
-		double totalArea;	// total area of the culm
+		double LAI;		// accumulated lai for this culm
 		double dltLAI; //growth for the current day
 		double dltStressedLAI; //adjusted growth for stress for the current day
 
@@ -55,18 +54,18 @@ namespace Sorghum {
 
 		void setCanopyParams(LeafAreaParams lAP, double finalLeafNumber);
 
-		double gettotalArea() { return totalArea; }
-
 		double calcLeafAppearance(double dltTT, double appearanceRate1, double  appearanceRate2, double noRateChange);
-		double calcPotentialLeafArea(void);
+		double calcPotentialLeafArea(double density);
 		double calcIndividualLeafSize(double leafNo);
 		double getProportion() { return proportion; }
 
 		int getCulmNo() { return culmNo; }
 		double getAreaOfCurrentLeaf(double leaves);
 
-		double getTotalLAI() { return totalLAI; }
-		void setTotalLAI(double val) { totalLAI = val; }
+		double Culm::culmArea(double nLeaves);
+
+		double getTotalLAI() { return LAI; }
+		void setTotalLAI(double val) { LAI = val; }
 		double getDltLAI() { return dltLAI; }
 		double setDltLAI(double val) { dltLAI = val; }
 		double getStressedDltLAI() { return dltStressedLAI; }

@@ -35,11 +35,10 @@ void Culm::initialize(void)
 	//finalLeafCorrection = 0;
 	//vertAdjValue = 0.0;
 	proportion = 1.0;
-	totalLAI = 0.0;
+	LAI = 0.0;
 	dltStressedLAI = 0.0;
 	dltLAI = 0.0;
 	leafArea = 0;
-	totalArea = 0;
 }
 
 
@@ -94,18 +93,27 @@ double Culm::calcLeafAppearance(double dltTT, double appearanceRate1, double  ap
 }
 
 
-double Culm::calcPotentialLeafArea(void)
+double Culm::calcPotentialLeafArea(double density)
 {
-	// Today's total culm area is calculated. 
+	// Today's total culm area is calculated. In LAI so  * smm2sm * density
 	double leafNoEffective = Min(currentLeafNo + leafNoCorrection, finalLeafNo);
-	double leafAreaNow = leafArea;
-	leafArea = 0.0;
-	for (int i = 0; i < ceil(leafNoEffective); i++)
+	// Get the potential increase in leaf area due the the leaf expansion for today. 
+	double leafAreaNow = culmArea(leafNoEffective - dltLeafNo);
+	leafArea = culmArea(leafNoEffective);
+	double dltLeafArea = max(leafArea - leafAreaNow, 0.0);
+	dltLAI = dltLeafArea * smm2sm * density;
+	return dltLAI;
+}
+
+double Culm::culmArea(double nLeaves)
+{
+	double area = 0;
+	for (int i = 0; i < ceil(nLeaves); i++)
 	{
-		double fraction = min(1.0, leafNoEffective - i);
-		leafArea += leafSizes[i] * fraction;
+		double fraction = min(1.0, nLeaves - i);
+		area += leafSizes[i] * fraction;
 	}
-	return max(leafArea - leafAreaNow,0.0);
+	return area;
 }
 
 

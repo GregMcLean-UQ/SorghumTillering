@@ -59,8 +59,8 @@ void LeafCulms::initialize()
 	tillerSdIntercept = 0;
 	tillerSdSlope = 0;
 	tillerSlaBound = 0;
-	radiationValues.clear();
-	temperatureValues.clear();
+	radiationValues = 0;
+	temperatureValues = 0;
 	laiReductionForSLA = 0.0;
 	totalLaiReductionForSLA = 0.0;
 	maxLaiTarget = 0.0;
@@ -128,7 +128,7 @@ void LeafCulms::updateVars(void)
 		//Culms[i]->updateVars();
 		tillers += Culms[i]->getProportion();
 		leafAppearance.push_back(Culms[i]->getCurrentLeafNo());
-		culmArea.push_back(Culms[i]->gettotalArea());
+		culmArea.push_back(Culms[i]->getLeafArea());
 		culmLAI.push_back(Culms[i]->getTotalLAI());
 	}
 	tillers--;
@@ -208,7 +208,7 @@ void LeafCulms::calcPotentialArea(void)
 	{
 		for (int i = 0; i < (int)Culms.size(); ++i)
 		{
-			dltPotentialLAI += Culms[i]->calcPotentialLeafArea() * smm2sm * density;
+			dltPotentialLAI += Culms[i]->calcPotentialLeafArea(density);
 		}
 		double stressEffect = Min(Min(plant->water->getExpansionStress(), plant->nitrogen->getExpansionStress()), plant->phosphorus->getExpansionStress());
 		dltStressedLAI = dltPotentialLAI * stressEffect;
@@ -427,7 +427,6 @@ void LeafCulms::calcLeafNo(void)
 		// 
 		// Calculate leaf growth for each culm. Tillers take longer than main to get all leaves expanded.
 		// Stop calculating at SGF for now.
-		int currentLeaf = (int)floor( Culms[0]->getCurrentLeafNo());
 		if (stage < startGrainFill)
 		{
 			dltLeafNo = Culms[0]->calcLeafAppearance(plant->phenology->getDltTT(), appearanceRate1, appearanceRate2, noRateChange);
@@ -436,7 +435,9 @@ void LeafCulms::calcLeafNo(void)
 				Culms[i]->calcLeafAppearance(plant->phenology->getDltTT(), appearanceRate1, appearanceRate2, noRateChange);
 			}
 		}
+
 		// Calculate tiller numbers
+		int currentLeaf = (int)floor(Culms[0]->getCurrentLeafNo());
 		if(currentLeaf > startThermalQuotientLeafNo) calcTillers(currentLeaf);
 
 	}
@@ -451,12 +452,12 @@ void LeafCulms::calcTillers(int currentLeaf)
 	if (newLeaf >= startThermalQuotientLeafNo + 1 && currentLeaf < endThermalQuotientLeafNo + 1)
 	{
 		//need to calculate the average R/oCd per day during leaf 5 expansion
-		radiationValues.push_back(plant->today.radn);
-		temperatureValues.push_back(plant->phenology->getDltTT());
+		radiationValues += plant->today.radn;
+		temperatureValues += plant->phenology->getDltTT();
 
 		if (newLeaf == endThermalQuotientLeafNo + 1)	// L5 Fully Expanded
 		{
-			double PTQ = sumVector(radiationValues) / sumVector(temperatureValues);
+			double PTQ = radiationValues / temperatureValues;
 			calcTillerNumber(PTQ);
 			AddInitialTillers();
 		}
@@ -562,7 +563,7 @@ void LeafCulms::AddInitialTillers(void)
 	}
 
 	if (nTillers > 3)
-		initiateTiller(1, 1, 1);
+		initiateTiller(1, 1, 2);
 }
 
 void LeafCulms::initiateTiller(int tillerNumber, double fractionToAdd, double initialLeaf)
