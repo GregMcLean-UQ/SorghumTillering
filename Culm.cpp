@@ -95,7 +95,7 @@ double Culm::calcLeafAppearance(double dltTT, double appearanceRate1, double  ap
 
 double Culm::calcPotentialLeafArea(double density, double stressEffect)
 {
-	// Today's total culm area is calculated. In LAI so  * smm2sm * density
+	// Today's total culm area is calculated. In LAI so  * smm2sm * density reduced by stress
 	double leafNoEffective = Min(currentLeafNo + leafNoCorrection, finalLeafNo);
 	// Get the potential increase in leaf area due the the leaf expansion for today. 
 	double leafAreaNow = culmArea(leafNoEffective - dltLeafNo);
@@ -114,32 +114,6 @@ double Culm::culmArea(double nLeaves)
 		area += leafSizes[i] * fraction;
 	}
 	return area;
-}
-
-/*	double leafsize = calcIndividualLeafSize(leafNoEffective);
-	//leafArea = getAreaOfCurrentLeaf(leafNoEffective);		HACK
-	//leafArea *= proportion; //proportion is 1 unless this tiller is a fraction ie: Fertile Tiller Number is 2.2, then 1 tiller is 0.2
-	totalArea += leafsize * dltLeafNo;
-	leafArea = leafsize * smm2sm * density * dltLeafNo; // in dltLai
-	dltLAI = leafArea * proportion;
-	return dltLAI;
-	//totalLAI += leafArea;
-	//return (leafArea * proportion);
-}*/
-
-double Culm::getAreaOfCurrentLeaf(double leafNo)
-{
-	// interpolate leaf sizes to get area of this leaf
-	// check upper
-	if (leafNo > leafSizes.size())
-		return leafSizes.back();
-	else
-	{
-		int leafIndx = (int)floor(leafNo) - 1;
-		double leafPart = leafNo - floor(leafNo);
-		double size = leafSizes[leafIndx] + (leafSizes[leafIndx + 1] - leafSizes[leafIndx]) * leafPart;
-		return size;
-	}
 }
 
 

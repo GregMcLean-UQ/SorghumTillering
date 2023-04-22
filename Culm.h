@@ -62,7 +62,6 @@ namespace Sorghum {
 		double getProportion() { return proportion; }
 
 		int getCulmNo() { return culmNo; }
-		double getAreaOfCurrentLeaf(double leaves);
 
 		double Culm::culmArea(double nLeaves);
 
