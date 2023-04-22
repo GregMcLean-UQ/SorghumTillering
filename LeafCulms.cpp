@@ -206,15 +206,10 @@ void LeafCulms::calcPotentialArea(void)
 
 	if (stage > emergence)// && stage <= flag)
 	{
-		for (int i = 0; i < (int)Culms.size(); ++i)
-		{
-			dltPotentialLAI += Culms[i]->calcPotentialLeafArea() * smm2sm * density;
-		}
 		double stressEffect = Min(Min(plant->water->getExpansionStress(), plant->nitrogen->getExpansionStress()), plant->phosphorus->getExpansionStress());
-		dltStressedLAI = dltPotentialLAI * stressEffect;
 		for (int i = 0; i < (int)Culms.size(); ++i)
 		{
-			Culms[i]->setStressedDltLAI(Culms[i]->getDltLAI() * stressEffect);
+			dltStressedLAI += Culms[i]->calcPotentialLeafArea(density, stressEffect);
 		}
 	}
 }
@@ -259,7 +254,7 @@ void LeafCulms::areaActual(void)
 		{
 			if (accProportion < maxTillerLoss && tillerLaiLeftToReduce > 0)
 			{
-				double tillerArea = Culms[i]->getTotalLAI() + Culms[i]->getStressedDltLAI();
+				double tillerArea = Culms[i]->getTotalLAI() + Culms[i]->getDltLAI();
 				double tillerProportion = Culms[i]->getProportion();
 				if (tillerProportion > 0.0 && tillerArea > 0.0)
 				{
@@ -278,8 +273,8 @@ void LeafCulms::areaActual(void)
 					scienceAPI.write(msg);
 
 					//if leaf is over sla hard limit, remove as much of the new growth from this tiller first rather than proportionally across all
-					double amountToRemove = Min(laiReductionForSLA, Culms[i]->getStressedDltLAI());
-					Culms[i]->setStressedDltLAI(Culms[i]->getStressedDltLAI() - amountToRemove);
+					double amountToRemove = Min(laiReductionForSLA, Culms[i]->getDltLAI());
+					Culms[i]->setDltLAI(Culms[i]->getDltLAI() - amountToRemove);
 					laiReductionForSLA -= amountToRemove;
 				}
 			}
@@ -352,7 +347,7 @@ double LeafCulms::calcSLA()
 void LeafCulms::reportAreaDiscrepency()
 {
 	double totalDltLeaf = 0.0;
-	for (unsigned i = 0; i < Culms.size(); i++) totalDltLeaf += Culms[i]->getStressedDltLAI();
+	for (unsigned i = 0; i < Culms.size(); i++) totalDltLeaf += Culms[i]->getDltLAI();
 
 	double diffInLeafArea = totalDltLeaf - dltLAI;
 	if (abs(diffInLeafArea) > 0.0001)
@@ -381,7 +376,7 @@ void LeafCulms::reduceAllTillersProportionately(double laiReduction)
 	if (laiReduction <= 0.0) return;
 
 	double totalDltLeaf = 0.0;
-	for (unsigned i = 0; i < Culms.size(); i++) totalDltLeaf += Culms[i]->getStressedDltLAI();
+	for (unsigned i = 0; i < Culms.size(); i++) totalDltLeaf += Culms[i]->getDltLAI();
 
 	//reduce new leaf growth proportionally across all culms
 	//not reducing the number of tillers at this stage
@@ -389,10 +384,10 @@ void LeafCulms::reduceAllTillersProportionately(double laiReduction)
 	{
 		for (unsigned i = 0; i < Culms.size(); i++)
 		{
-			double dLAI = Culms[i]->getStressedDltLAI();
+			double dLAI = Culms[i]->getDltLAI();
 			//adjust culm dltLAI by proportion of total dltLAI
 			double culmProportionToRemove = Max(dLAI / totalDltLeaf * laiReduction, 0);
-			Culms[i]->setStressedDltLAI(dLAI - culmProportionToRemove);
+			Culms[i]->setDltLAI(dLAI - culmProportionToRemove);
 		}
 	}
 }
@@ -400,7 +395,7 @@ void LeafCulms::updateCulmLeafAreas()
 {
 	for (unsigned i = 0; i < Culms.size(); i++)
 	{
-		Culms[i]->setTotalLAI(Culms[i]->getTotalLAI() + Culms[i]->getStressedDltLAI());
+		Culms[i]->setTotalLAI(Culms[i]->getTotalLAI() + Culms[i]->getDltLAI());
 	}
 }
 
