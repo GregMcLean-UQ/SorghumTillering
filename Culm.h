@@ -54,26 +54,22 @@ namespace Sorghum {
 
 		void setCanopyParams(LeafAreaParams lAP, double finalLeafNumber);
 
-		double gettotalArea() { return totalArea; }
-
 		double calcLeafAppearance(double dltTT, double appearanceRate1, double  appearanceRate2, double noRateChange);
 		double calcPotentialLeafArea(double density, double stressEffect);
-		double calcIndividualLeafSize(double leafNo);
+		double calcCulmArea(double nLeaves);
+
+		double gettotalArea() { return totalArea; }
 		double getProportion() { return proportion; }
-
 		int getCulmNo() { return culmNo; }
-
-		double Culm::culmArea(double nLeaves);
-
 		double getTotalLAI() { return totalLAI; }
-		void setTotalLAI(double val) { totalLAI = val; }
 		double getDltLAI() { return dltLAI; }
-		void setDltLAI(double val) { dltLAI = val; }
-		void setProportion(double val) { proportion = val; }
 		double getLeafArea() { return leafArea; }
-
 		double getFinalLeafNo(void) { return finalLeafNo; }
 		double getCurrentLeafNo(void) { return currentLeafNo; }
+
+		void setTotalLAI(double val) { totalLAI = val; }
+		void setDltLAI(double val) { dltLAI = val; }
+		void setProportion(double val) { proportion = val; }
 		void setCurrentLeafNo(const double& val) { currentLeafNo = val; }
 
 	};

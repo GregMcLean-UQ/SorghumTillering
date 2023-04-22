@@ -98,14 +98,14 @@ double Culm::calcPotentialLeafArea(double density, double stressEffect)
 	// Today's total culm area is calculated. In LAI so  * smm2sm * density reduced by stress
 	double leafNoEffective = Min(currentLeafNo + leafNoCorrection, finalLeafNo);
 	// Get the potential increase in leaf area due the the leaf expansion for today. 
-	double leafAreaNow = culmArea(leafNoEffective - dltLeafNo);
-	leafArea = culmArea(leafNoEffective);
+	double leafAreaNow = calcCulmArea(leafNoEffective - dltLeafNo);
+	leafArea = calcCulmArea(leafNoEffective);
 	double dltLeafArea = max(leafArea - leafAreaNow, 0.0);
 	dltLAI = dltLeafArea * smm2sm * density * stressEffect;
 	return dltLAI;
 }
 
-double Culm::culmArea(double nLeaves)
+double Culm::calcCulmArea(double nLeaves)
 {
 	double area = 0;
 	for (int i = 0; i < ceil(nLeaves); i++)
@@ -114,57 +114,5 @@ double Culm::culmArea(double nLeaves)
 		area += leafSizes[i] * fraction;
 	}
 	return area;
-}
-
-
-double Culm::calcIndividualLeafSize(double leafNo)
-{
-	// use finalLeafNo to calculate the size of the individual leafs
-	// Eqn 5 from Improved methods for predicting individual leaf area and leaf senescence in maize
-	// (Zea mays) C.J. Birch, G.L. Hammer and K.G. Ricket. Aust. J Agric. Res., 1998, 49, 249-62
-	//
-
-
-	//double leafPlateauStart = 24;
-	//adding new code to handle varieties that grow very high number of leaves
-	/*
-
-	if (largestLeafPlateau > 1)
-	{
-		if (finalLeafNo > largestLeafPlateau)
-		{
-			largestLeafPos = aX0I + aX0S * largestLeafPlateau;
-
-			if (leafNo > largestLeafPos)
-			{
-				double tailCount = largestLeafPlateau - largestLeafPos;
-				if (leafNo < finalLeafNo - tailCount)
-				{
-					leafNo = largestLeafPos;
-				}
-				else
-				{
-					leafNo = largestLeafPlateau - (finalLeafNo - leafNo);
-				}
-			}
-		}
-	}*/
-
-	//Relationship for calculating maximum individual leaf area from Total Leaf No
-	//Source: Modelling genotypic and environmental control of leaf area dynamics in grain sorghum. II. Individual leaf level 
-	//Carberry, Muchow, Hammer,1992
-	//written as Y = Y0*exp(a*pow(X-X0,2)+b*(pow(X-X0,3))) 
-	//pg314 -Leaf area production model
-
-	//Largest Leaf calculation
-	//originally from "Improved methods for predicting individual leaf area and leaf senescence in maize" - Birch, Hammer, Rickert 1998
-	//double aMaxB = 4.629148, aMaxC = 6.6261562; 
-	//double aMax = aMaxA * (1 - exp(-aMaxB * (finalLeafNo - aMaxC)));  // maximum individual leaf area
-	//Calculation then changed to use the relationship as described in the Carberry paper in Table 2
-	//The actual intercept and slope will be determined by the cultivar, and read from the config file (sorghum.xml)
-	//aMaxS = 19.5; //not 100% sure what this number should be - tried a range and this provided the best fit forthe test data
-
-	//double leafSize = largestLeafSize * exp(a * pow((leafNo - largestLeafPos), 2) + b * pow((leafNo - largestLeafPos), 3)) * 100;
-	return 0;// leafSize;
 }
 
