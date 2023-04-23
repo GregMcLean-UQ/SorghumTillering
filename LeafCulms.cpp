@@ -281,7 +281,6 @@ double LeafCulms::calcCeaseTillerSignal()
 {
 	// Calculate sla target that is below the actual SLA - so as the leaves gets thinner it signals to the tillers to cease growing further
 	// max SLA (thinnest leaf) possible using Reeves (1960's Kansas) SLA = 429.72 - 18.158 * LeafNo
-	tillerSlaBound = 0.0;
 	double nLeaves = Culms[0]->getCurrentLeafNo();
 	maxSLA = 429.72 - 18.158 * (nLeaves);
 	maxSLA *= ((100 - tillerSlaBound) / 100.0);		// sla bound vary 30 - 40%
