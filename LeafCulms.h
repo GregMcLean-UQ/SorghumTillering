@@ -43,8 +43,8 @@ namespace Sorghum {
 		double supply;
 		double demand;
 
-		vector<double> radiationValues;
-		vector<double> temperatureValues;
+		double radiationValues;
+		double temperatureValues;
 		double avgRadiation;
 		double thermalTimeCount;
 		double maxLAIForTillerAddition;
