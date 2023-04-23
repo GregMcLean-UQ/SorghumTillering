@@ -215,18 +215,18 @@ void LeafCulms::areaActual(void)
 {
 	// Leaves cannot grow too thin - SLA has a maximum point
 	// Calculate the fraction of dltLAI we cannot get due to carbon limitation.
-	double laiSlaReduction = calcCarbonLimitation();
+	double laiSlaReductionFraction = calcCarbonLimitation();
 
-	dltLAI = dltStressedLAI * laiSlaReduction;
+	dltLAI = dltStressedLAI * laiSlaReductionFraction;
 
 	// Apply to each culm
-	if (laiSlaReduction < 1.0)
-		reduceAllTillersProportionately(laiSlaReduction);
+	if (laiSlaReductionFraction < 1.0)
+		reduceAllTillersProportionately(laiSlaReductionFraction);
 	updateCulmLeafAreas();
 
 	SLA = calcSLA();
 
-	if (stage > endJuv)
+	if (stage > endJuv && calculatedTillers > 0.0 && stage < flag)
 		calculateTillerCessation();
 
 }
@@ -240,7 +240,7 @@ void LeafCulms::calculateTillerCessation(void)
 	bool moreToAdd = (tillersAdded < calculatedTillers) && (linearLAI < maxLAIForTillerAddition);
 	tillerLaiToReduce = calcCeaseTillerSignal();
 	double nLeaves = Culms[0]->getCurrentLeafNo();
-	if (nLeaves < 8 || moreToAdd || tillerLaiToReduce == 0.0)return;
+	if (nLeaves < 8 || moreToAdd || tillerLaiToReduce < 0.00001)return;
 
 	// Active tiller reduction is rate limited, so only 0.3 tillers can be deactivated 
 
@@ -255,28 +255,23 @@ void LeafCulms::calculateTillerCessation(void)
 	{
 		if (accProportion < maxTillerLoss && tillerLaiLeftToReduce > 0)
 		{
-			double tillerArea = Culms[i]->getTotalLAI() + Culms[i]->getDltLAI();
+			double tillerLAI = Culms[i]->getTotalLAI();
 			double tillerProportion = Culms[i]->getProportion();
-			if (tillerProportion > 0.0 && tillerArea > 0.0)
+			if (tillerProportion > 0.0 && tillerLAI > 0.0)
 			{
-				sprintf(msg, "\t Tiller No: %d \t\tProportion: %.3f \t\tArea: %.3f \t\tTiller area to remove: %.3f\n", i, tillerProportion, tillerArea, tillerLaiLeftToReduce);
+				sprintf(msg, "\t Tiller No: %d \t\tProportion: %.3f \t\tArea: %.3f \t\tTiller area to remove: %.3f\n", i, tillerProportion, tillerLAI, tillerLaiLeftToReduce);
 				scienceAPI.write(msg);
 
 				//use the amount of LAI past the target as an indicator of how much of the tiller
 				//to remove which will affect tomorrow's growth - up to the maxTillerLoss
-				double propn = Max(0.0, Min(maxTillerLoss - accProportion, tillerLaiLeftToReduce / tillerArea));
+				double propn = Max(0.0, Min(maxTillerLoss - accProportion, tillerLaiLeftToReduce / tillerLAI));
 				accProportion += propn;
-				tillerLaiLeftToReduce -= propn * tillerArea;
+				tillerLaiLeftToReduce -= propn * tillerLAI;
 				double remainingProportion = Max(0.0, Culms[i]->getProportion() - propn);
 				Culms[i]->setProportion(remainingProportion); //can't increase the proportion
 
-				sprintf(msg, "\t Remove Proportion: %.3f \t\tAcc proportion: %.3f \t\tLAI reduction: %.3f, \t\tArea left to remove: %.3f\n\n", propn, accProportion, propn * tillerArea, tillerLaiLeftToReduce);
+				sprintf(msg, "\t Remove Proportion: %.3f \t\tAcc proportion: %.3f \t\tLAI reduction: %.3f, \t\tArea left to remove: %.3f\n\n", propn, accProportion, propn * tillerLAI, tillerLaiLeftToReduce);
 				scienceAPI.write(msg);
-
-				//if leaf is over sla hard limit, remove as much of the new growth from this tiller first rather than proportionally across all
-				double amountToRemove = Min(laiReductionForSLA, Culms[i]->getDltLAI());
-				Culms[i]->setDltLAI(Culms[i]->getDltLAI() - amountToRemove);
-				laiReductionForSLA -= amountToRemove;
 			}
 		}
 	}
@@ -284,45 +279,27 @@ void LeafCulms::calculateTillerCessation(void)
 
 double LeafCulms::calcCeaseTillerSignal()
 {
-	// calculate sla target that is below the actual SLA - so as the leaves gets thinner it signals to the tillers to cease growing further
+	// Calculate sla target that is below the actual SLA - so as the leaves gets thinner it signals to the tillers to cease growing further
 	// max SLA (thinnest leaf) possible using Reeves (1960's Kansas) SLA = 429.72 - 18.158 * LeafNo
+	tillerSlaBound = 0.0;
 	double nLeaves = Culms[0]->getCurrentLeafNo();
-	maxSLA = 429.72 - 18.158 * (nLeaves + dltLeafNo);
+	maxSLA = 429.72 - 18.158 * (nLeaves);
 	maxSLA *= ((100 - tillerSlaBound) / 100.0);		// sla bound vary 30 - 40%
 	maxSLA = Min(400, maxSLA);
 	maxSLA = Max(150, maxSLA);
 
-	//calc how much LAI we need to remove to get back to the SLA target line
-	//this value will be limited by the proportion of tiller area in maxTillerLoss 
-	//dltStressedLai can be greater than the actual SLA limitation would allow
-	//provides a stronger signal
+	// Calc how much LAI we need to remove to get back to the SLA target line.
+	// This is done by reducing the proportion of tiller area.
 	maxLaiTarget = maxSLA * (dmGreen + dltDmGreen) / 10000;
-	return Max(lai + dltStressedLAI - maxLaiTarget, 0);
-}
-
-bool LeafCulms::noAreaAdjustmentNeeded()
-{
-	//don't calculate SLA limitations prior to endjuv
-	if (stage < endJuv)
-	{
-		updateCulmLeafAreas();
-		return true;
-	}
-
-	//new leaf growth should have stopped at flagleaf - do we allow for some tillers to finish after flag?
-	if (stage >= flag)
-	{
-		updateCulmLeafAreas();
-		return true;
-	}
-	return false;
+	return Max(lai + dltLAI - maxLaiTarget, 0);
 }
 
 double LeafCulms::calcCarbonLimitation()
 {
+	if (dltDmGreen < 0.001)return 1.0;
 	double dltLaiPossible = dltDmGreen * slaMax * smm2sm;
 	laiReductionForSLA = Max(dltStressedLAI - dltLaiPossible, 0.0);
-	double fraction = Min(dltStressedLAI > 0 ? (dltLaiPossible / dltStressedLAI) : 0.0, 1);
+	double fraction = Min(dltStressedLAI > 0 ? (dltLaiPossible / dltStressedLAI) : 1.0, 1.0);
 	totalLaiReductionForSLA += laiReductionForSLA;
 	if (laiReductionForSLA > 0)
 	{
@@ -376,7 +353,7 @@ void LeafCulms::reduceAllTillersProportionately(double laiReductionFraction)
 	double totalDltLeaf = 0.0;
 	for (unsigned i = 0; i < Culms.size(); i++)
 	{
-		Culms[i]->setDltLAI(Culms[i]->getDltLAI() * laiReductionFraction;
+		Culms[i]->setDltLAI(Culms[i]->getDltLAI() * laiReductionFraction);
 	}
 }
 void LeafCulms::updateCulmLeafAreas()

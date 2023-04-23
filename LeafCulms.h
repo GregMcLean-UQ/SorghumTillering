@@ -96,7 +96,6 @@ namespace Sorghum {
 
 		//void addTillerProportion(double leafAtAppearance, double fractionToAdd);
 		virtual double calcCeaseTillerSignal();
-		virtual bool noAreaAdjustmentNeeded();
 		virtual double calcCarbonLimitation();
 		virtual double calcSLA();
 		virtual void reportAreaDiscrepency();
