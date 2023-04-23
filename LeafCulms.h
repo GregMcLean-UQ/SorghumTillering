@@ -91,6 +91,7 @@ namespace Sorghum {
 		void AddInitialTillers(void);
 		virtual void initiateTiller(int tillerNumber, double fractionToAdd, double initialLeaves);
 		double calcLinearLAI(void);
+		void LeafCulms::calculateTillerCessation(void);
 
 
 		//void addTillerProportion(double leafAtAppearance, double fractionToAdd);

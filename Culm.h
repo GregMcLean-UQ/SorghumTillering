@@ -27,19 +27,19 @@ namespace Sorghum {
 		int culmNo;
 
 		// Leaf Area
-		double aMax;	//Area of the largest leaf.
-		double x0;		// position of the largest leaf.
+		double aMax;	// Area of the largest leaf.
+		double x0;		// Position of the largest leaf.
 		double a, b;	// Bell shaped curve characteristics.
 
-		double leafNoCorrection;       //corrects for other growing leaves
+		double leafNoCorrection;		// Corrects for other growing leaves.
 		double largestLeafPlateau;
 		double finalLeafNo;
 		double dltLeafNo;
 		double currentLeafNo;
 		double proportion;
-		double leafArea;//changes each day
-		double totalLAI;		// accumulated lai for this culm
-		double dltLAI; //growth for the current day
+		double leafArea;				// Total leaf area of the culm.
+		double totalLAI;				// Accumulated lai for this culm.
+		double dltLAI;					// Daily growth for the current day.
 
 	public:
 		vector<double> leafSizes;
