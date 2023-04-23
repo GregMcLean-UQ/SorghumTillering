@@ -39,7 +39,7 @@ namespace Sorghum {
 		double proportion;
 		double leafArea;//changes each day
 		double totalLAI;		// accumulated lai for this culm
-		double totalArea;	// total area of the culm
+		//double totalArea;	// total area of the culm
 		double dltLAI; //growth for the current day
 
 	public:
@@ -58,7 +58,7 @@ namespace Sorghum {
 		double calcPotentialLeafArea(double density, double stressEffect);
 		double calcCulmArea(double nLeaves);
 
-		double gettotalArea() { return totalArea; }
+		//double gettotalArea() { return totalArea; }
 		double getProportion() { return proportion; }
 		int getCulmNo() { return culmNo; }
 		double getTotalLAI() { return totalLAI; }

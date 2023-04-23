@@ -38,7 +38,7 @@ void Culm::initialize(void)
 	totalLAI = 0.0;
 	dltLAI = 0.0;
 	leafArea = 0;
-	totalArea = 0;
+	//totalArea = 0;
 }
 
 

@@ -128,7 +128,7 @@ void LeafCulms::updateVars(void)
 		//Culms[i]->updateVars();
 		tillers += Culms[i]->getProportion();
 		leafAppearance.push_back(Culms[i]->getCurrentLeafNo());
-		culmArea.push_back(Culms[i]->gettotalArea());
+		culmArea.push_back(Culms[i]->getLeafArea());
 		culmLAI.push_back(Culms[i]->getTotalLAI());
 	}
 	tillers--;
@@ -216,14 +216,14 @@ void LeafCulms::calcPotentialArea(void)
 
 void LeafCulms::areaActual(void)
 {
-	//leaves cannot grow too thin - SLA has a maximum point
-	//when there are tillers present, stop active growth on them first
-	//active tiller reduction is rate limited, so only 0.3 tillers can be deactivated - the rest must come from reducing new leaf growth
+	// Leaves cannot grow too thin - SLA has a maximum point
 	laiReductionForSLA = 0.0;
 	maxLaiTarget = 0.0;
 	tillerLaiToReduce = 0.0;
 	SLA = 0.0;
 	maxSLA = 0.0;
+
+	laiReductionForSLA = calcCarbonLimitation();
 
 	if (noAreaAdjustmentNeeded())
 	{
@@ -232,7 +232,6 @@ void LeafCulms::areaActual(void)
 		return;
 	}
 
-	laiReductionForSLA = calcCarbonLimitation();
 	dltLAI = dltStressedLAI - laiReductionForSLA;
 	SLA = calcSLA();
 
@@ -240,6 +239,7 @@ void LeafCulms::areaActual(void)
 
 	bool moreToAdd = (tillersAdded < calculatedTillers) && (linearLAI < maxLAIForTillerAddition);
 	double nLeaves = Culms[0]->getCurrentLeafNo();
+	//active tiller reduction is rate limited, so only 0.3 tillers can be deactivated - the rest must come from reducing new leaf growth
 
 	if (nLeaves > 7 && !moreToAdd && tillerLaiToReduce > 0.0)
 	{
