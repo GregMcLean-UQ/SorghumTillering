@@ -105,7 +105,7 @@ double Culm::calcPotentialLeafArea(double density, double stressEffect)
 	double leafAreaNow = calcCulmArea(leafNoEffective - dltLeafNo);
 	leafArea = calcCulmArea(leafNoEffective);
 	double dltLeafArea = max(leafArea - leafAreaNow, 0.0);
-	dltLAI = dltLeafArea * smm2sm * density * stressEffect;
+	dltLAI = dltLeafArea * smm2sm * density * stressEffect * proportion;
 	return dltLAI;
 }
 

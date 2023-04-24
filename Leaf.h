@@ -185,6 +185,7 @@ namespace Sorghum {
 
 			// tillers
 			virtual void reduceTillers(double reduceLAI){};
+			virtual bool allFullyExpanded(void) { return true; }
 
 		};  // Leaf
 	}

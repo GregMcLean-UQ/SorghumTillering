@@ -116,6 +116,8 @@ namespace Sorghum {
 		vector<double> culmArea;
 		vector<double> culmLAI;
 
+		virtual bool allFullyExpanded(void);
+
 	};
 
 	class LeafCulms_Fixed : public LeafCulms

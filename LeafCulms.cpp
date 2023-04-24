@@ -173,6 +173,21 @@ void LeafCulms::doRegistrations(void)
 }
 //--------------------------------------------------------------------------------------------------
 
+bool LeafCulms::allFullyExpanded(void)
+{
+	bool fullyExpanded = true;
+	for (unsigned i = 0; i < Culms.size(); ++i)
+	{
+		if (Culms[i]->getProportion() > 0 && Culms[i]->getCurrentLeafNo() < Culms[i]->getFinalLeafNo())
+		{
+			fullyExpanded = false;
+			break;
+		}
+	}
+	return fullyExpanded;
+
+}
+
 void LeafCulms::CulmArea(vector<float>& result)
 {
 	DVecToFVec(result, culmArea);
