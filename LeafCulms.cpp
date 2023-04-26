@@ -240,8 +240,7 @@ void LeafCulms::areaActual(void)
 	updateCulmLeafAreas();
 
 	SLA = calcSLA();
-
-	if (stage > endJuv && calculatedTillers > 0.0 && stage < flag)
+	if (stage > endJuv && calculatedTillers > 0.0 && (Culms[0]->getCurrentLeafNo() < leafAreaParams.X0Main))
 		calculateTillerCessation();
 
 }
@@ -422,13 +421,13 @@ void LeafCulms::calcTillers(int currentLeaf)
 
 	// Up to L5 FE store PTQ. At L5 FE calculate tiller number (endThermalQuotientLeafNo).
 	// At L5 FE newLeaf = 6 and currentLeaf = 5
-	if (newLeaf >= startThermalQuotientLeafNo + 1 && currentLeaf < endThermalQuotientLeafNo + 1)
+	if (newLeaf >= startThermalQuotientLeafNo && currentLeaf < endThermalQuotientLeafNo)
 	{
 		//  Calculate the average R/oCd per day during leaf 5 expansion
 		radiationValues += plant->today.radn;
 		temperatureValues += plant->phenology->getDltTT();
 
-		if (newLeaf == endThermalQuotientLeafNo + 1)	// L5 Fully Expanded
+		if (newLeaf == endThermalQuotientLeafNo)	// L5 Fully Expanded
 		{
 			double PTQ = radiationValues / temperatureValues;
 			calcTillerNumber(PTQ);
@@ -447,7 +446,7 @@ void LeafCulms::calcTillers(int currentLeaf)
 	//					4. there should be a tiller at that node. ( Check tillerOrder)
 	tillersAdded = Culms.size() - 1;
 	double lLAI = calcLinearLAI();
-	if (newLeaf >= 6 && newLeaf > currentLeaf && calculatedTillers > tillersAdded && calcLinearLAI() < maxLAIForTillerAddition)
+	if (newLeaf >= 5 && newLeaf > currentLeaf && calculatedTillers > tillersAdded && calcLinearLAI() < maxLAIForTillerAddition)
 	{
 		// Axil = currentLeaf - 3
 		int newNodeNumber = currentLeaf - 3;
