@@ -128,7 +128,6 @@ void LeafCulms::updateVars(void)
 		culmLAI.push_back(Culms[i]->getTotalLAI());
 	}
 	tillers--;
-	Culms[0]->getCurrentLeafNo();
 	Leaf::updateVars();
 }
 
@@ -154,6 +153,8 @@ void LeafCulms::doRegistrations(void)
 
 	scienceAPI.exposeFunction("LeafSizesMain", "mm2", "Size of each leaf on the main culm",
 		FloatArrayFunction(&LeafCulms::getLeafSizesMain));
+	scienceAPI.exposeFunction("LeafSizesTiller1", "mm2", "Size of each leaf on T1",
+		FloatArrayFunction(&LeafCulms::getLeafSizesTiller1));
 	scienceAPI.exposeFunction("LeafSizesTiller2", "mm2", "Size of each leaf on T2",
 		FloatArrayFunction(&LeafCulms::getLeafSizesTiller2));
 	scienceAPI.exposeFunction("LeafSizesTiller3", "mm2", "Size of each leaf on T3",
@@ -400,7 +401,8 @@ void LeafCulms::calcLeafNo(void)
 		// 
 		// Calculate leaf growth for each culm. Tillers take longer than main to get all leaves expanded.
 		// Stop calculating at SGF for now.
-		int currentLeaf = (int)floor(Culms[0]->getCurrentLeafNo());
+		double nLeaves = Culms[0]->getCurrentLeafNo();
+		int currentLeaf = (int)floor(nLeaves);
 		if (stage < startGrainFill)
 		{
 			dltLeafNo = Culms[0]->calcLeafAppearance(plant->phenology->getDltTT(), appearanceRate1, appearanceRate2, noRateChange);
@@ -410,7 +412,7 @@ void LeafCulms::calcLeafNo(void)
 			}
 		}
 		// Calculate tiller numbers
-		if (currentLeaf > startThermalQuotientLeafNo) calcTillers(currentLeaf);
+		if (nLeaves > startThermalQuotientLeafNo) calcTillers(currentLeaf);
 
 	}
 }
@@ -449,7 +451,7 @@ void LeafCulms::calcTillers(int currentLeaf)
 	if (newLeaf >= 5 && newLeaf > currentLeaf && calculatedTillers > tillersAdded && calcLinearLAI() < maxLAIForTillerAddition)
 	{
 		// Axil = currentLeaf - 3
-		int newNodeNumber = currentLeaf - 3;
+		int newNodeNumber = newLeaf - 3;
 		if (std::find(tillerOrder.begin(), tillerOrder.end(), newNodeNumber) != tillerOrder.end())
 		{
 			double fractionToAdd = min(1.0, calculatedTillers - tillersAdded);
@@ -519,7 +521,7 @@ void LeafCulms::AddInitialTillers(void)
 	}
 
 	if (nTillers > 3)
-		initiateTiller(1, 1, 1);
+		initiateTiller(1, 1, 2);
 }
 
 void LeafCulms::initiateTiller(int tillerNumber, double fractionToAdd, double initialLeaf)
@@ -547,7 +549,7 @@ void LeafCulms::getLeafSizesMain(vector<float>& result)
 	DVecToFVec(result, Culms[0]->leafSizes);
 }
 
-void LeafCulms::getLeafSizesTiller2(vector<float>& result)
+void LeafCulms::getLeafSizesTiller1(vector<float>& result)
 {
 	if (Culms.size() > 1)
 	{
@@ -558,7 +560,7 @@ void LeafCulms::getLeafSizesTiller2(vector<float>& result)
 		DVecToFVec(result, vector<double>());
 	}
 }
-void LeafCulms::getLeafSizesTiller3(vector<float>& result)
+void LeafCulms::getLeafSizesTiller2(vector<float>& result)
 {
 	if (Culms.size() > 2)
 	{
@@ -569,7 +571,7 @@ void LeafCulms::getLeafSizesTiller3(vector<float>& result)
 		DVecToFVec(result, vector<double>());
 	}
 }
-void LeafCulms::getLeafSizesTiller4(vector<float>& result)
+void LeafCulms::getLeafSizesTiller3(vector<float>& result)
 {
 	if (Culms.size() > 3)
 	{
@@ -580,11 +582,22 @@ void LeafCulms::getLeafSizesTiller4(vector<float>& result)
 		DVecToFVec(result, vector<double>());
 	}
 }
-void LeafCulms::getLeafSizesTiller5(vector<float>& result)
+void LeafCulms::getLeafSizesTiller4(vector<float>& result)
 {
 	if (Culms.size() > 4)
 	{
 		DVecToFVec(result, Culms[4]->leafSizes);
+	}
+	else
+	{
+		DVecToFVec(result, vector<double>());
+	}
+}
+void LeafCulms::getLeafSizesTiller5(vector<float>& result)
+{
+	if (Culms.size() > 5)
+	{
+		DVecToFVec(result, Culms[5]->leafSizes);
 	}
 	else
 	{
