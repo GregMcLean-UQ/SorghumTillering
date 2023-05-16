@@ -143,7 +143,6 @@ namespace Sorghum {
 			virtual void  readParams (void);
 			virtual void  updateVars(void);
 
-			void  process(void);
 			virtual void  calcLeafNo(void);
 			virtual void  calcPotentialArea(void);
 

@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LocalDebuggerCommand>C:\Apsim\ApsimTillering\Model\ApsimModel.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommandArguments>"C:\Crops\Sorghum\TilleringValidation\Data\Work\Sorghum_Gatton_Tiller_x_Density_4.sim"</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LocalDebuggerCommand>C:\Apsim\ApsimTillering\Model\ApsimModel.exe</LocalDebuggerCommand>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerCommandArguments>"C:\Crops\Sorghum\TilleringValidation\Data\Work\Sorghum_Gatton_Tiller_x_Density_1.sim"</LocalDebuggerCommandArguments>
+  </PropertyGroup>
+</Project>

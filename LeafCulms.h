@@ -98,7 +98,6 @@ namespace Sorghum {
 		virtual double calcCeaseTillerSignal();
 		virtual double calcCarbonLimitation();
 		virtual double calcSLA();
-		virtual void reportAreaDiscrepency();
 		virtual void reduceAllTillersProportionately(double laiReduction);
 		virtual void updateCulmLeafAreas();
 

@@ -227,13 +227,21 @@ void LeafCulms::calcPotentialArea(void)
 	}
 }
 
+
 void LeafCulms::areaActual(void)
 {
+	if (stage > endJuv && calculatedTillers > 0.0 && (Culms[0]->getCurrentLeafNo() < leafAreaParams.X0Main))
+		calculateTillerCessation();
 	// Leaves cannot grow too thin - SLA has a maximum point
 	// Calculate the fraction of dltLAI we cannot get due to carbon limitation.
 	double laiSlaReductionFraction = calcCarbonLimitation();
 
-	dltLAI = dltStressedLAI * laiSlaReductionFraction;
+	dltStressedLAI = 0;
+	for (unsigned i = 0; i < Culms.size(); i++)
+		dltStressedLAI += Culms[i]->getDltLAI();
+
+	double leaf = Culms[0]->getCurrentLeafNo();
+	dltLAI = Max(dltStressedLAI * laiSlaReductionFraction, 0.0);
 
 	// Apply to each culm
 	if (laiSlaReductionFraction < 1.0)
@@ -241,8 +249,7 @@ void LeafCulms::areaActual(void)
 	updateCulmLeafAreas();
 
 	SLA = calcSLA();
-	if (stage > endJuv && calculatedTillers > 0.0 && (Culms[0]->getCurrentLeafNo() < leafAreaParams.X0Main))
-		calculateTillerCessation();
+	
 
 }
 
@@ -287,9 +294,17 @@ void LeafCulms::calculateTillerCessation(void)
 
 				sprintf(msg, "\t Remove Proportion: %.3f \t\tAcc proportion: %.3f \t\tLAI reduction: %.3f, \t\tArea left to remove: %.3f\n\n", propn, accProportion, propn * tillerLAI, tillerLaiLeftToReduce);
 				scienceAPI.write(msg);
+				dltLAI -= propn * tillerLAI;
+				//dltLAI -= Max(propn * tillerLAI, 0.0);
+				//Culms[i]->setDltLAI(Max(Culms[i]->getDltLAI() - propn * tillerLAI,0.0));
+				Culms[i]->setDltLAI(Culms[i]->getDltLAI() - propn * tillerLAI);
 			}
 		}
+		if (!(tillerLaiLeftToReduce > 0) || accProportion >= maxTillerLoss)break;
 	}
+	
+
+
 }
 
 double LeafCulms::calcCeaseTillerSignal()
@@ -311,7 +326,17 @@ double LeafCulms::calcCeaseTillerSignal()
 double LeafCulms::calcCarbonLimitation()
 {
 	if (dltDmGreen < 0.001)return 1.0;
+	
 	double dltLaiPossible = dltDmGreen * slaMax * smm2sm;
+	// Changing to Reeves + 10%
+	double nLeaves = Culms[0]->getCurrentLeafNo();
+	double maxSLA;
+	maxSLA = 429.72 - 18.158 * (nLeaves);
+//	maxSLA *= 0.9;// ((100 - tillerSlaBound) / 100.0);		// sla bound vary 30 - 40%
+	maxSLA = Min(400, maxSLA);
+	maxSLA = Max(150, maxSLA);
+	dltLaiPossible = dltDmGreen * maxSLA / 10000.0;
+
 	laiReductionForSLA = Max(dltStressedLAI - dltLaiPossible, 0.0);
 	double fraction = Min(dltStressedLAI > 0 ? (dltLaiPossible / dltStressedLAI) : 1.0, 1.0);
 	totalLaiReductionForSLA += laiReductionForSLA;
@@ -333,38 +358,10 @@ double LeafCulms::calcSLA()
 }
 
 
-void LeafCulms::reportAreaDiscrepency()
-{
-	double totalDltLeaf = 0.0;
-	for (unsigned i = 0; i < Culms.size(); i++) totalDltLeaf += Culms[i]->getDltLAI();
-
-	double diffInLeafArea = totalDltLeaf - dltLAI;
-	if (abs(diffInLeafArea) > 0.0001)
-	{
-		char msg[120];
-		scienceAPI.write(" Diff in DltStressedLeaf and Culm Leaf Area Values: \n");
-		sprintf(msg, "\t dltStressedLAI: %.5f \t\tTotal DltLAI in Culms: %.5f \t\tDiff: %.7f \n", dltStressedLAI, totalDltLeaf, diffInLeafArea);
-		scienceAPI.write(msg);
-	}
-
-	double totalLAI = 0.0;
-	for (unsigned i = 0; i < Culms.size(); i++) totalLAI += Culms[i]->getTotalLAI();
-
-	diffInLeafArea = totalLAI - lai;
-	if (abs(diffInLeafArea) > 0.000001)
-	{
-		char msg[120];
-		scienceAPI.write(" Diff in Leaf LAI and Culm Leaf LAI Values: \n");
-		sprintf(msg, "\t LAI: %.3f \t\tTotal LAI in Culms: %.3f \t\tDiff: %.7f \n", lai, totalLAI, diffInLeafArea);
-		scienceAPI.write(msg);
-	}
-}
-
 void LeafCulms::reduceAllTillersProportionately(double laiReductionFraction)
 {
 	if (laiReductionFraction <= 0.0) return;
 
-	double totalDltLeaf = 0.0;
 	for (unsigned i = 0; i < Culms.size(); i++)
 	{
 		Culms[i]->setDltLAI(Culms[i]->getDltLAI() * laiReductionFraction);
