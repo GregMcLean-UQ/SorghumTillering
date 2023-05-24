@@ -232,13 +232,16 @@ void LeafCulms::areaActual(void)
 {
 	if (stage > endJuv && calculatedTillers > 0.0 && (Culms[0]->getCurrentLeafNo() < leafAreaParams.X0Main))
 		calculateTillerCessation();
+
+	// recalculate todays LAI
+	dltStressedLAI = 0;
+	for (unsigned i = 0; i < Culms.size(); i++)
+		dltStressedLAI += Culms[i]->getDltLAI();
+	
 	// Leaves cannot grow too thin - SLA has a maximum point
 	// Calculate the fraction of dltLAI we cannot get due to carbon limitation.
 	double laiSlaReductionFraction = calcCarbonLimitation();
 
-	dltStressedLAI = 0;
-	for (unsigned i = 0; i < Culms.size(); i++)
-		dltStressedLAI += Culms[i]->getDltLAI();
 
 	double leaf = Culms[0]->getCurrentLeafNo();
 	dltLAI = Max(dltStressedLAI * laiSlaReductionFraction, 0.0);
@@ -249,7 +252,7 @@ void LeafCulms::areaActual(void)
 	updateCulmLeafAreas();
 
 	SLA = calcSLA();
-	
+
 
 }
 
@@ -302,7 +305,7 @@ void LeafCulms::calculateTillerCessation(void)
 		}
 		if (!(tillerLaiLeftToReduce > 0) || accProportion >= maxTillerLoss)break;
 	}
-	
+
 
 
 }
@@ -326,13 +329,13 @@ double LeafCulms::calcCeaseTillerSignal()
 double LeafCulms::calcCarbonLimitation()
 {
 	if (dltDmGreen < 0.001)return 1.0;
-	
+
 	double dltLaiPossible = dltDmGreen * slaMax * smm2sm;
 	// Changing to Reeves + 10%
 	double nLeaves = Culms[0]->getCurrentLeafNo();
 	double maxSLA;
 	maxSLA = 429.72 - 18.158 * (nLeaves);
-//	maxSLA *= 0.9;// ((100 - tillerSlaBound) / 100.0);		// sla bound vary 30 - 40%
+	//	maxSLA *= 0.9;// ((100 - tillerSlaBound) / 100.0);		// sla bound vary 30 - 40%
 	maxSLA = Min(400, maxSLA);
 	maxSLA = Max(150, maxSLA);
 	dltLaiPossible = dltDmGreen * maxSLA / 10000.0;
