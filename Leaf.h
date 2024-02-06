@@ -15,6 +15,7 @@ namespace Sorghum {
 		{
 		protected:
 
+
 			// Parameters ----------------------------------------------------------
 			double noSeed;
 			double noEmergence;
@@ -134,6 +135,8 @@ namespace Sorghum {
 		public:
 			Leaf(ScienceAPI2 &, Plant *p);
 			~Leaf();
+
+			string tilleringType;
 
 			// plant
 			double dltNSenesced;

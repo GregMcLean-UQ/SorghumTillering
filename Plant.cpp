@@ -19,7 +19,7 @@ using namespace Sorghum;
 //------------------------------------------------------------------------------------------------
 Plant::Plant(ScienceAPI2& api) : scienceAPI(api)
 {
-	leafAreaCalcType = "tpla";
+	TilleringType = "tpla";
 	initialize();
 }
 //------------------------------------------------------------------------------------------------
@@ -96,17 +96,20 @@ void Plant::plantInit1(void)
 	scienceAPI.read("crop_type", "", false, cropType);
 	scienceAPI.read("default_crop_class", "", false, defaultCropClass);
 	scienceAPI.read("row_spacing_default", "", false, rowSpacingDefault);
-	scienceAPI.read("leaf_area_calc_type", "", true, leafAreaCalcType);
+	scienceAPI.read("leaf_area_calc_type", "", true, TilleringType);
 
 	roots = new Roots(scienceAPI, this);   PlantComponents.push_back(roots); PlantParts.push_back(roots);
-	if (leafAreaCalcType == "bellcurve")
-	{
-		leaf = new LeafCulms(scienceAPI, this);
-	}
-	else
-	{
-		leaf = new LeafCulms_Fixed(scienceAPI, this);
-	}
+
+	leaf = new LeafCulms(scienceAPI, this);
+	leaf->tilleringType = TilleringType;
+	//if (leafAreaCalcType == "bellcurve")
+	//{
+		//leaf = new LeafCulms(scienceAPI, this);
+	//}
+	//else
+	//{
+	//	leaf = new LeafCulms_Fixed(scienceAPI, this);
+	//}
 
 	PlantComponents.push_back(leaf);
 	PlantParts.push_back(leaf);

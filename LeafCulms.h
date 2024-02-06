@@ -34,8 +34,9 @@ namespace Sorghum {
 	{
 		// private Methods -------------------------------------------------------
 	private:
-		LeafAreaParams leafAreaParams;
+		
 	protected:
+		LeafAreaParams leafAreaParams;
 		vector<Culm*> Culms;
 		vector<int> tillerOrder;
 //		double verticalAdjustment;
@@ -130,11 +131,12 @@ namespace Sorghum {
 		LeafCulms_Fixed(ScienceAPI2&, Plant* p);
 		virtual ~LeafCulms_Fixed();
 
-		virtual void readParams(void);
+		//virtual void readParams(void);
 		virtual void calcLeafNo(void);
 		virtual void calcTillerAppearance(int newLeafNo, int currentLeafNo);
+		void calcTillers(int currentLeaf);
 		virtual void areaActual(void);
-		virtual void initiateTiller(int tillerNumber, double fractionToAdd, double initialLeaf);
+		//virtual void initiateTiller(int tillerNumber, double fractionToAdd, double initialLeaf);
 	};
 	//------------------------------------------------------------------------------------------------
 }

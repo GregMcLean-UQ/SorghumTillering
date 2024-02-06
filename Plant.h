@@ -125,7 +125,7 @@ class Plant
 
 
    bool estimateTillers(double &ftn);
-   string leafAreaCalcType; //tpla or bellcurve
+   string TilleringType; //tpla or bellcurve
 
    public:
    // ------------------------------------------------------
