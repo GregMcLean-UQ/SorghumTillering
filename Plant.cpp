@@ -96,7 +96,7 @@ void Plant::plantInit1(void)
 	scienceAPI.read("crop_type", "", false, cropType);
 	scienceAPI.read("default_crop_class", "", false, defaultCropClass);
 	scienceAPI.read("row_spacing_default", "", false, rowSpacingDefault);
-	scienceAPI.read("leaf_area_calc_type", "", true, TilleringType);
+	scienceAPI.read("tilleringType", "", true, TilleringType);
 
 	roots = new Roots(scienceAPI, this);   PlantComponents.push_back(roots); PlantParts.push_back(roots);
 
