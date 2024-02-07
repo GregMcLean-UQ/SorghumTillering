@@ -228,14 +228,16 @@ void LeafCulms::calcPotentialArea(void)
 
 void LeafCulms::areaActual(void)
 {
-	if (stage > endJuv && calculatedTillers > 0.0 && (Culms[0]->getCurrentLeafNo() < leafAreaParams.X0Main))
-		calculateTillerCessation();
+	if (tilleringType == "Dynamic")
+	{
+		if (stage > endJuv && calculatedTillers > 0.0 && (Culms[0]->getCurrentLeafNo() < leafAreaParams.X0Main))
+			calculateTillerCessation();
 
-	// recalculate todays LAI
-	dltStressedLAI = 0;
-	for (unsigned i = 0; i < Culms.size(); i++)
-		dltStressedLAI += Culms[i]->getDltLAI();
-	
+		// recalculate todays LAI
+		dltStressedLAI = 0;
+		for (unsigned i = 0; i < Culms.size(); i++)
+			dltStressedLAI += Culms[i]->getDltLAI();
+	}
 	// Leaves cannot grow too thin - SLA has a maximum point
 	// Calculate the fraction of dltLAI we cannot get due to carbon limitation.
 	double laiSlaReductionFraction = calcCarbonLimitation();
@@ -250,7 +252,6 @@ void LeafCulms::areaActual(void)
 	updateCulmLeafAreas();
 
 	SLA = calcSLA();
-
 
 }
 
@@ -603,196 +604,3 @@ void LeafCulms::getLeafSizesTiller5(vector<float>& result)
 	}
 }
 
-
-
-//------------------------------------------------------------------------------------------------
-//------ LeafCulms_Fixed
-//------------------------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------------------------
-//------ LeafCulms_Fixed Constructor
-//------------------------------------------------------------------------------------------------
-LeafCulms_Fixed::LeafCulms_Fixed(ScienceAPI2& api, Plant* p) : LeafCulms(api, p)
-{
-	plant = p;
-	name = "Leaf";
-	partNo = 1;
-	//initialize();
-	//doRegistrations();
-}
-//------------------------------------------------------------------------------------------------
-//------ Destructor
-//------------------------------------------------------------------------------------------------
-LeafCulms_Fixed::~LeafCulms_Fixed()
-{
-}
-
-
-
-void LeafCulms_Fixed::calcLeafNo(void)
-{
-	// Overriding this function to retain existing code on Leaf class, but changing this one to manage tillers and leaves.
-	// First culm is the main one, that also provides timing for remaining tiller appearance.
-
-	// Calculate final leaf number up to initiation and update each culm FLN and canopy params.
-	if (Culms.size() > 0 && stage >= emergence)
-	{
-		// Update canopy parameters for each tiller.
-		if (stage <= fi)
-		{
-			calcFinalLeafNo();
-			for (int i = 0; i < (int)Culms.size(); ++i)
-			{
-				leafAreaParams.aMaxMain = leafAreaParams.aMaxS * finalLeafNo + leafAreaParams.aMaxI;	// Area of the largest leaf on Main.
-				leafAreaParams.X0Main = leafAreaParams.aX0S * finalLeafNo + leafAreaParams.aX0I;		// Posn of largest leaf on Main.
-				Culms[i]->setCanopyParams(leafAreaParams, finalLeafNo);
-			}
-		}
-
-		// 
-		// Calculate leaf growth for each culm. Tillers take longer than main to get all leaves expanded.
-		// Stop calculating at SGF for now.
-		double nLeaves = Culms[0]->getCurrentLeafNo();
-		int currentLeaf = (int)floor(nLeaves);
-		if (stage < startGrainFill)
-		{
-			dltLeafNo = Culms[0]->calcLeafAppearance(plant->phenology->getDltTT(), appearanceRate1, appearanceRate2, noRateChange);
-			for (int i = 1; i < (int)Culms.size(); ++i)
-			{
-				Culms[i]->calcLeafAppearance(plant->phenology->getDltTT(), appearanceRate1, appearanceRate2, noRateChange);
-			}
-		}
-		// Calculate tiller numbers
-		if (nLeaves > startThermalQuotientLeafNo) 
-			calcTillers(currentLeaf);
-
-	}
-}
-
-void LeafCulms_Fixed::calcTillers(int currentLeaf)
-{
-	// Calculate tiller addition
-	int newLeaf = (int)floor(Culms[0]->getCurrentLeafNo());
-	if (newLeaf == endThermalQuotientLeafNo && Culms.size() == 1)	// L5 Fully Expanded
-	{
-		calculatedTillers = plant->getFtn();
-		AddInitialTillers();
-	}
-
-	
-
-	// Each time a leaf becomes fully expanded starting at 5 see if a tiller should be initiated.
-	// When a leaf is fully expanded a tiller can be initiated at the axil 3 leaves less
-	// So at L5 FE (newLeaf = 6, currentLeaf = 5) a Tiller might be at axil 2. i.e. a T2 
-
-	// Add any new tillers and then calc each tiller in turn.
-	// Add a tiller if 1. There are more tillers to add.
-	//					2. linearLAI < maxLAIForTillerAddition
-	//					3. A leaf has fully expanded.  (newLeaf >= 6, newLeaf > currentLeaf)
-	//					4. there should be a tiller at that node. ( Check tillerOrder)
-	tillersAdded = Culms.size() - 1;
-	double lLAI = calcLinearLAI();
-	if (newLeaf >= 5 && newLeaf > currentLeaf && calculatedTillers > tillersAdded)
-	{
-		// Axil = currentLeaf - 3
-		int newNodeNumber = newLeaf - 3;
-		if (std::find(tillerOrder.begin(), tillerOrder.end(), newNodeNumber) != tillerOrder.end())
-		{
-			double fractionToAdd = min(1.0, calculatedTillers - tillersAdded);
-			initiateTiller(newNodeNumber, fractionToAdd, 1);
-		}
-	}
-}
-
-void LeafCulms_Fixed::calcTillerAppearance(int newLeafNo, int currentLeafNo)
-{
-	//if there are still more tillers to add
-	//and the newleaf is greater than 3
-	if (plant->getFtn() > tillersAdded)
-	{
-		//tiller emergence is more closely aligned with tip apearance, but we don't track tip, so will use ligule appearance
-		//could also use Thermal Time calcs if needed
-		//Environmental & Genotypic Control of Tillering in Sorghum ppt - Hae Koo Kim
-		//T2=L3, T3=L4, T4=L5, T5=L6
-
-		//logic to add new tillers depends on which tiller, which is defined by FTN (fertileTillerNo)
-		//this should be provided at sowing  //what if fertileTillers == 1?
-		//2 tillers = T3 + T4
-		//3 tillers = T2 + T3 + T4
-		//4 tillers = T2 + T3 + T4 + T5
-		//more than that is too many tillers - but will assume existing pattern for 3 and 4
-		//5 tillers = T2 + T3 + T4 + T5 + T6
-
-		bool newLeaf = newLeafNo > currentLeafNo;
-		bool newTiller = newLeaf && newLeafNo >= 3; //is it a new leaf, and it is leaf 3 or more
-		if (newTiller)
-		{
-			//tiller 2 emergences with leaf 3, and then adds 1 each time
-			//not sure what I'm supposed to do with tiller 1
-			//if there are only 2 tillers, then t2 is not present - T3 & T4 are
-			//if there is a fraction - between 2 and 3, 
-			//this can be interpreted as a proportion of plants that have 2 and a proportion that have 3. 
-			//to keep it simple, the fraction will be applied to the 2nd tiller
-			double leafAppearance = Culms.size() + 2; //first culm added will equal 3
-			double fraction = 1.0;
-			if (plant->getFtn() > 2 && plant->getFtn() < 3 && leafAppearance < 4)
-			{
-				fraction = fmod(plant->getFtn(), 1);
-				//tillersAdded += fraction;
-			}
-			else
-			{
-				if (plant->getFtn() - tillersAdded < 1)
-					fraction = plant->getFtn() - tillersAdded;
-				//tillersAdded += 1;
-			}
-
-			initiateTiller(Culms.size(), fraction, leafAppearance);
-			tillersAdded += fraction;
-			////a new tiller is created with each new leaf, up the number of fertileTillers
-			//Culm* newCulm = new Culm(scienceAPI, plant, leafAppearance);
-			//newCulm->readParams();
-			//newCulm->setCurrentLeafNo(leafAppearance-1);
-			//verticalAdjustment = aMaxVert;
-			//verticalAdjustment += (Culms.size() - 1) * 0.05;
-			//newCulm->setVertLeafAdj(verticalAdjustment);
-			//newCulm->setProportion(fraction);
-			//newCulm->calcFinalLeafNo();
-			//newCulm->calcLeafAppearance();
-			//newCulm->calculateLeafSizes();
-			//Culms.push_back(newCulm);
-
-			//bell curve distribution is adjusted horizontally by moving the curve to the left.
-			//This will cause the first leaf to have the same value as the nth leaf on the main culm.
-			//T3&T4 were defined during dicussion at initial tillering meeting 27/06/12
-			//all others are an assumption
-			//T2 = 3 Leaves
-			//T3 = 4 Leaves
-			//T4 = 5 leaves
-			//T5 = 6 leaves
-			//T6 = 7 leaves
-		}
-	}
-}
-
-void LeafCulms_Fixed::areaActual(void)
-{
-	
-	// recalculate todays LAI
-	dltStressedLAI = 0;
-	for (unsigned i = 0; i < Culms.size(); i++)
-		dltStressedLAI += Culms[i]->getDltLAI();
-
-	// Leaves cannot grow too thin - SLA has a maximum point
-	// Calculate the fraction of dltLAI we cannot get due to carbon limitation.
-	double laiSlaReductionFraction = calcCarbonLimitation();
-
-	dltLAI = Max(dltStressedLAI * laiSlaReductionFraction, 0.0);
-
-	// Apply to each culm
-	if (laiSlaReductionFraction < 1.0)
-		reduceAllTillersProportionately(laiSlaReductionFraction);
-	updateCulmLeafAreas();
-
-	SLA = calcSLA();
-}

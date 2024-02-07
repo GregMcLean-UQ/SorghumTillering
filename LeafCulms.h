@@ -121,23 +121,6 @@ namespace Sorghum {
 
 	};
 
-	class LeafCulms_Fixed : public LeafCulms
-	{
-		// private Methods -------------------------------------------------------
-	private:
-
-		// public Methods -------------------------------------------------------
-	public:
-		LeafCulms_Fixed(ScienceAPI2&, Plant* p);
-		virtual ~LeafCulms_Fixed();
-
-		//virtual void readParams(void);
-		virtual void calcLeafNo(void);
-		virtual void calcTillerAppearance(int newLeafNo, int currentLeafNo);
-		void calcTillers(int currentLeaf);
-		virtual void areaActual(void);
-		//virtual void initiateTiller(int tillerNumber, double fractionToAdd, double initialLeaf);
-	};
 	//------------------------------------------------------------------------------------------------
 }
 #endif

@@ -102,14 +102,6 @@ void Plant::plantInit1(void)
 
 	leaf = new LeafCulms(scienceAPI, this);
 	leaf->tilleringType = TilleringType;
-	//if (leafAreaCalcType == "bellcurve")
-	//{
-		//leaf = new LeafCulms(scienceAPI, this);
-	//}
-	//else
-	//{
-	//	leaf = new LeafCulms_Fixed(scienceAPI, this);
-	//}
 
 	PlantComponents.push_back(leaf);
 	PlantParts.push_back(leaf);
