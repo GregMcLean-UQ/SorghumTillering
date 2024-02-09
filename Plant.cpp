@@ -19,7 +19,7 @@ using namespace Sorghum;
 //------------------------------------------------------------------------------------------------
 Plant::Plant(ScienceAPI2& api) : scienceAPI(api)
 {
-	TilleringType = "tpla";
+	TilleringType = "";
 	initialize();
 }
 //------------------------------------------------------------------------------------------------
@@ -207,7 +207,7 @@ void Plant::onSowCrop(SowType& sow)
 
 	checkRange(scienceAPI, skipRow, 0.0, 2.0, "skiprow");
 
-	if (sow.tiller_no_fertile == "")
+	if (TilleringType == "RuleOfThumb")
 	{
 		scienceAPI.get("latitude", "", 0, latitude, -90.0f, 90.0f);
 		// if no tiller number is entered, estimate it

@@ -430,8 +430,15 @@ void LeafCulms::calcTillers(int currentLeaf)
 
 		if (newLeaf == endThermalQuotientLeafNo)	// L5 Fully Expanded
 		{
-			double PTQ = radiationValues / temperatureValues;
-			calcTillerNumber(PTQ);
+			// If Dynamic tillering, calculate expected tiller number else set it tp ftn
+			if (tilleringType == "Dynamic")
+			{
+				double PTQ = radiationValues / temperatureValues;
+				calcTillerNumber(PTQ);
+			}
+			else
+				calculatedTillers = plant->ftn;
+
 			AddInitialTillers();
 		}
 	}
@@ -447,14 +454,17 @@ void LeafCulms::calcTillers(int currentLeaf)
 	//					4. there should be a tiller at that node. ( Check tillerOrder)
 	tillersAdded = Culms.size() - 1;
 	double lLAI = calcLinearLAI();
-	if (newLeaf >= 5 && newLeaf > currentLeaf && calculatedTillers > tillersAdded && calcLinearLAI() < maxLAIForTillerAddition)
+	if (newLeaf >= 5 && newLeaf > currentLeaf && calculatedTillers > tillersAdded )
 	{
-		// Axil = currentLeaf - 3
-		int newNodeNumber = newLeaf - 3;
-		if (std::find(tillerOrder.begin(), tillerOrder.end(), newNodeNumber) != tillerOrder.end())
+		if (tilleringType == "Dynamic" && lLAI < maxLAIForTillerAddition || tilleringType != "Dynamic")
 		{
-			double fractionToAdd = min(1.0, calculatedTillers - tillersAdded);
-			initiateTiller(newNodeNumber, fractionToAdd, 1);
+			// Axil = currentLeaf - 3
+			int newNodeNumber = newLeaf - 3;
+			if (std::find(tillerOrder.begin(), tillerOrder.end(), newNodeNumber) != tillerOrder.end())
+			{
+				double fractionToAdd = min(1.0, calculatedTillers - tillersAdded);
+				initiateTiller(newNodeNumber, fractionToAdd, 1);
+			}
 		}
 	}
 }

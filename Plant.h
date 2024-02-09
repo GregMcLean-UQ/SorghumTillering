@@ -64,6 +64,8 @@ class Plant
 
    Today  today;                      // holds day,year,rain,temp etc
    int das;
+   double ftn;                   // fertile tiller number
+
    bool isEmerged(void) { return phenology->currentStage() >= emergence; }
    string uptake_source;
    string module_name(void) { return scienceAPI.name(); }
@@ -81,7 +83,6 @@ class Plant
    double skipRow;
    float sowingDepth;
    float plantDensity;
-   double ftn;                   // fertile tiller number
    double vpd;
 
    double rue;
