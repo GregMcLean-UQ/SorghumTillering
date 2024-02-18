@@ -61,6 +61,8 @@ namespace Sorghum {
 		int getCulmNo() { return culmNo; }
 		double getTotalLAI() { return totalLAI; }
 		double getDltLAI() { return dltLAI; }
+		double getDltLeafNo() { return dltLeafNo; }
+		
 		double getLeafArea() { return leafArea; }
 		double getFinalLeafNo(void) { return finalLeafNo; }
 		double getCurrentLeafNo(void) { return currentLeafNo; }

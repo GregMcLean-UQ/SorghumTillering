@@ -404,12 +404,12 @@ void LeafCulms::calcLeafNo(void)
 		int currentLeaf = (int)floor(nLeaves);
 		if (stage < startGrainFill)
 		{
-			dltLeafNo = Culms[0]->calcLeafAppearance(plant->phenology->getDltTT(), appearanceRate1, appearanceRate2, noRateChange);
-			for (int i = 1; i < (int)Culms.size(); ++i)
+			for (int i = 0; i < (int)Culms.size(); ++i)
 			{
 				Culms[i]->calcLeafAppearance(plant->phenology->getDltTT(), appearanceRate1, appearanceRate2, noRateChange);
 			}
 		}
+		dltLeafNo = Culms[0]->getDltLeafNo();
 		// Calculate tiller numbers
 		if (nLeaves > startThermalQuotientLeafNo) calcTillers(currentLeaf);
 
