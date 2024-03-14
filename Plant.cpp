@@ -311,6 +311,7 @@ void Plant::process(void)                 // do crop preparation
 	leaf->calcLeafNo();
 
 	phenology->development();
+
 	stage = (float)phenology->currentStage();
 	for (unsigned i = 0; i < PlantParts.size(); i++)
 	{
