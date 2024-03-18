@@ -299,7 +299,9 @@ void LeafCulms::calculateTillerCessation(void)
 				dltLAI -= propn * tillerLAI;
 				//dltLAI -= Max(propn * tillerLAI, 0.0);
 				//Culms[i]->setDltLAI(Max(Culms[i]->getDltLAI() - propn * tillerLAI,0.0));
-				Culms[i]->setDltLAI(Culms[i]->getDltLAI() - propn * tillerLAI);
+				double temp = Culms[i]->getDltLAI() - propn * tillerLAI;
+				//Culms[i]->setDltLAI(Culms[i]->getDltLAI() - propn * tillerLAI);
+				Culms[i]->setTotalLAI(Culms[i]->getTotalLAI() - propn * tillerLAI);
 			}
 		}
 		if (!(tillerLaiLeftToReduce > 0) || accProportion >= maxTillerLoss)break;
