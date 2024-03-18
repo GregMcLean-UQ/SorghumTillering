@@ -108,6 +108,7 @@ namespace Sorghum {
 		void getLeafSizesTiller3(vector<float>& result);
 		void getLeafSizesTiller4(vector<float>& result);
 		void getLeafSizesTiller5(vector<float>& result);
+		void getLeafSizesTiller6(vector<float>& result);
 		void LeafApp(vector<float>& result);
 		void CulmArea(vector<float>& result);
 		void CulmLAI(vector<float>& result);

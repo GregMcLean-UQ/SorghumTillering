@@ -161,6 +161,8 @@ void LeafCulms::doRegistrations(void)
 		FloatArrayFunction(&LeafCulms::getLeafSizesTiller4));
 	scienceAPI.exposeFunction("LeafSizesTiller5", "mm2", "Size of each leaf on T5",
 		FloatArrayFunction(&LeafCulms::getLeafSizesTiller5));
+	scienceAPI.exposeFunction("LeafSizesTiller6", "mm2", "Size of each leaf on T5",
+		FloatArrayFunction(&LeafCulms::getLeafSizesTiller6));
 	scienceAPI.exposeFunction("LeafApp", "()", "Number of leaves on each culm",
 		FloatArrayFunction(&LeafCulms::LeafApp));
 	scienceAPI.exposeFunction("CulmArea", "()", "Leaf Area on each culm",
@@ -550,6 +552,7 @@ double LeafCulms::calcLinearLAI(void)
 {
 	// calculate linear LAI
 	double pltsPerMetre = plant->getPlantDensity() * plant->getRowSpacing() / 1000.0 * plant->getSkipRow();
+	double tpla2 = (lai + sLai) / plant->getPlantDensity() * 10000; // Leaf area of one plant.
 	linearLAI = pltsPerMetre * tpla / 10000.0;
 	return linearLAI;
 }
@@ -609,6 +612,17 @@ void LeafCulms::getLeafSizesTiller5(vector<float>& result)
 	if (Culms.size() > 5)
 	{
 		DVecToFVec(result, Culms[5]->leafSizes);
+	}
+	else
+	{
+		DVecToFVec(result, vector<double>());
+	}
+}
+void LeafCulms::getLeafSizesTiller6(vector<float>& result)
+{
+	if (Culms.size() > 6)
+	{
+		DVecToFVec(result, Culms[6]->leafSizes);
 	}
 	else
 	{
